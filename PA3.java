@@ -8,8 +8,22 @@ Description:
 */
 public class PA3
 {
-    public static void main(String[] args) throws IOException 
+    public static void main(String[] args) 
     {
-        System.out.println("running");
+        //no negative parameters, all ints
+        int m = Integer.parseInt(args[0]);
+        int n = Integer.parseInt(args[1]);
+        int maxQ = Integer.parseInt(args[2]);
+
+        //parameter checking
+        if (args.length != 3)
+        {
+            //end program
+            System.out.println("Not enough Parameters");
+            return;
+        }
+        
+
+        System.out.println("running: "+ "m " +m+"n "+n+"maxQ"+maxQ);
     }
 }
