@@ -1,12 +1,12 @@
-public class BlockStage extends Stage
+public class BlockState extends State
 {
-    BlockStage()
+    BlockState()
     {
-        super("Blocked Stage");
+        super("Blocked State");
     }
 
-    BlockStage(double dur)
+    BlockState(double dur)
     {
-        super("Blocked Stage", dur);
+        super("Blocked State", dur);
     }
 }

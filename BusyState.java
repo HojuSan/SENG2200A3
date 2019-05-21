@@ -1,12 +1,12 @@
-public class BusyStage extends Stage
+public class BusyState extends State
 {
-    BusyStage()
+    BusyState()
     {
-        super("Busy Stage");
+        super("Busy State");
     }
 
-    BusyStage(double dur)
+    BusyState(double dur)
     {
-        super("Busy Stage", dur);
+        super("Busy State", dur);
     }
 }

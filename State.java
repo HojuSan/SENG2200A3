@@ -1,21 +1,21 @@
-public class Stage
+public class State
 {
     private double duration;
     private String name;
 
-    Stage()
+    State()
     {
         this.duration = 0;
         this.name = "";
     }
 
-    Stage(String name)
+    State(String name)
     {
         this.duration = 0;
         this.name = name;
     }
 
-    Stage(String name, double dur)
+    State(String name, double dur)
     {
         this.duration = dur;
         this.name = name;

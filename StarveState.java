@@ -1,12 +1,12 @@
-public class StarveStage extends Stage
+public class StarveState extends State
 {
-    StarveStage()
+    StarveState()
     {
-        super("Starve Stage");
+        super("Starve State");
     }
 
-    StarveStage(double dur)
+    StarveState(double dur)
     {
-        super("Starve Stage", dur);
+        super("Starve State", dur);
     }
 }
