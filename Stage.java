@@ -6,15 +6,11 @@ Student No:         c3244203
 Date:               21/05/2019
 Description:        
 */
-public class BlockState extends State
+public class Stage
 {
-    BlockState()
-    {
-        super("Blocked State");
-    }
 
-    BlockState(double dur)
+    Stage()
     {
-        super("Blocked State", dur);
+
     }
 }

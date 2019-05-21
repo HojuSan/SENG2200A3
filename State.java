@@ -1,3 +1,11 @@
+/*
+Title:              Assignment3 PA3.java
+Course:             SENG2200
+Author:             Juyong Kim
+Student No:         c3244203
+Date:               21/05/2019
+Description:        
+*/
 public class State
 {
     private double duration;
@@ -15,15 +23,15 @@ public class State
         this.name = name;
     }
 
-    State(String name, double dur)
+    State(String name, double time)
     {
-        this.duration = dur;
+        this.duration = time;
         this.name = name;
     }
 
-    public void incrementDuration(double dur)
+    public void incrementDuration(double time)
     {
-        this.duration += dur;
+        this.duration += time;
     }
 
     public double getDuration()
