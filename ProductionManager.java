@@ -28,7 +28,7 @@ public class ProductionManager
 
     //upper management
     //private Inventory statistics;
-    //private Scheduler scheduler;
+    private Scheduler scheduler;
 
     //constructor
     ProductionManager()
@@ -49,7 +49,7 @@ public class ProductionManager
         //this.statistics = new Inventory(this.stageList);
 
         // same as the number of Production stages
-        //this.scheduler = new Scheduler(8);
+        this.scheduler = new Scheduler(8);
     }
 
     //function that does the heavy lifting and starts the produciton line
@@ -61,7 +61,6 @@ public class ProductionManager
     //instantiates all the stages,states and interstagestorage
     public void createProductionLine()
     {
-        System.out.println("Not enough Parameters");
         //creation of interStageStorage
         q01 = new InterStageStorage("Q01", this.maxQ);
         q02 = new InterStageStorage("Q12", this.maxQ);
@@ -77,14 +76,14 @@ public class ProductionManager
         this.interStageList.add(q05);
 
         //creation of stages
-        s0 = new Stage("S0", m, n);
-        s1 = new Stage("S1", m, n);
-        s2a = new Stage("S2a", m, n);
-        s2b = new Stage("S2b", m, n);
-        s3 = new Stage("S3", m, n);
-        s4a = new Stage("S4a", m, n);
-        s4b = new Stage("S4b", m, n);
-        s5 = new Stage("S5", m, n);
+        s0 = new StartStage("S0", m, n, scheduler, q01);
+        s1 = new MiddleStage("S1", m, n, scheduler, q01, q02);
+        s2a = new MiddleStage("S2a", m, n, scheduler, q02, q03);
+        s2b = new MiddleStage("S2b", m, n, scheduler, q02, q03);
+        s3 = new MiddleStage("S3", m, n, scheduler, q03, q04);
+        s4a = new MiddleStage("S4a", m, n, scheduler, q04, q05);
+        s4b = new MiddleStage("S4b", m, n, scheduler, q04, q05);
+        s5 = new EndStage("S5", m, n, scheduler, q05);
 
         //Connecting the stages
         s0.setRight(s1);
@@ -122,5 +121,6 @@ public class ProductionManager
         this.stageList.add(s4a);
         this.stageList.add(s4b);
         this.stageList.add(s5);
+        System.out.println("Production line creation completed");
     }
 }

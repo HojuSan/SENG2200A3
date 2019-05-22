@@ -24,12 +24,8 @@ public class Stage
     private List<Stage> leftStage;
     private List<Stage> rightStage;
 
-    Stage()
-    {
-        this.name = "";
-    }
 
-    Stage(String newName, double mean, double range)
+    Stage(String newName, double mean, double range, Scheduler sch)
     {
         this.name = newName;
         this.m = mean;

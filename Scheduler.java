@@ -7,6 +7,6 @@ public class Scheduler
 
     Scheduler(int num)
     {
-        
+        currentTime = 0;
     }
 }
