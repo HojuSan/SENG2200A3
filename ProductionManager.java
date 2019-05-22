@@ -20,6 +20,9 @@ public class ProductionManager
     private ArrayList<InterStageStorage> interStageList;
     private ArrayList<Stage> stageList;
 
+    private Inventory statistics;
+    private Scheduler scheduler;
+
     ProductionManager()
     {
         this.m = 0;
@@ -36,12 +39,33 @@ public class ProductionManager
         this.stageList = new ArrayList<Stage>();
         this.interStageList = new ArrayList<InterStageStorage>();
 
-        this.prodStat = new Inventory(this.stageList);
+        this.statistics = new Inventory(this.stageList);
 
-        // Job priority queue should only have length
         // same as the number of Production stages
-        // TODO: Hard coded job queue length!
-        this.des_pq = new Scheduler(8);
+        this.scheduler = new Scheduler(8);
+    }
 
+    public void begin()
+    {
+        this.createProductionLine();
+    }
+
+    //instantiates all the stages,states and interstagestorage
+    public void createProductionLine()
+    {
+        //creation of interStageStorage
+        InterStageStorage q01, q02, q03, q04, q05;
+        q01 = new InterStageStorage("Q01", this.maxQ);
+        q02 = new InterStageStorage("Q12", this.maxQ);
+        q03 = new InterStageStorage("Q23", this.maxQ);
+        q04 = new InterStageStorage("Q34", this.maxQ);
+        q05 = new InterStageStorage("Q45", this.maxQ);
+
+        //add them to the list of storages
+        this.interStageList.add(q01);
+        this.interStageList.add(q02);
+        this.interStageList.add(q03);
+        this.interStageList.add(q04);
+        this.interStageList.add(q05);
     }
 }
