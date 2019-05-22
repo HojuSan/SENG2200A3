@@ -1,3 +1,5 @@
+import jdk.nashorn.internal.ir.Block;
+
 /*
 Title:              Assignment3 PA3.java
 Course:             SENG2200
@@ -10,6 +12,7 @@ public class State
 {
     private double duration;
     private String name;
+    private String status;
 
     State()
     {
@@ -27,6 +30,19 @@ public class State
     {
         this.duration = time;
         this.name = name;
+    }
+
+    //also needs a method of saving the times it changes
+    public void setStatus()
+    {
+        Block
+        Busy
+        Starve
+    }
+
+    public int getStatus()
+    {
+
     }
 
     public void incrementDuration(double time)
