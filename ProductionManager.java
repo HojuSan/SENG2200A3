@@ -17,6 +17,7 @@ public class ProductionManager
     private double m;
     private double n;
     private int maxQ;
+    private int timeLimit = 10000000;
 
     //production line
     private InterStageStorage q01, q02, q03, q04, q05;
@@ -55,9 +56,37 @@ public class ProductionManager
     //function that does the heavy lifting and starts the produciton line
     public void begin()
     {
+        //used as a check
+        Stage completed;
+
         this.createProductionLine();
 
+        while(scheduler.getCurrentTime()<timeLimit)
+        {
+            //process, unblock, block, starve stages
+            this.processCycle();
+
+            //finish the cycle
+            completed = this.scheduler.processNextStage();
+
+            //update new stage state durations
+            for (Stage p : this.stageList)
+            {
+                if (p != completed)
+                    p.updateTime(this.scheduler.getCurrentTime());
+            }
+            
+        }
+
         this.printResults();
+    }
+
+    private void processCycle()
+    {
+        for (Stage sta : this.stageList)
+        {
+            sta.processItem(this.scheduler.getCurrentTime());
+        }
     }
 
     //instantiates all the stages,states and interstagestorage

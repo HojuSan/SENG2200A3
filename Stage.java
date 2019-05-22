@@ -20,19 +20,26 @@ public class Stage
     private double prevTime;
 
     private List<State> statusList;
-    private State currentStatus;
+    private State currentState;
 
     private List<Stage> leftStage;
     private List<Stage> rightStage;
 
+    private Scheduler sch;
+    //key component of time management
+    //each class has its own override method
+    abstract public double processItem(double currentTime);
+    abstract public void finishItem(double currentTime);
 
-    Stage(String newName, double mean, double range, Scheduler sch)
+
+    Stage(String newName, double mean, double range, Scheduler schd)
     {
         this.name = newName;
         this.m = mean;
         this.n = range;
         this.processItem = null;
         this.r = new Random();
+        this.sch = schd;
         this.statusList = new LinkedList<State>();
         this.currentState = new State();
         this.leftStage = new LinkedList<Stage>();
@@ -50,25 +57,22 @@ public class Stage
         return m + (n * (r.nextDouble() - 0.5));
     }
 
-
-    //???????????????????????????????????????????????????????????????
     // Increase current state's duration
     public void updateTime(double currentTime)
     {
-        if (this.currentState.getStatus().equals("Starve"))
+        if(this.currentState.getStatus().equals("Starve"))
         {
-            this.statusList.add(new State(currentTime - this.prevTime));
+            this.statusList.add(new State((currentTime - this.prevTime),"Starve"));
         }
-        else if (this.currentState.getStatus().equals("Block"))
+        else if(this.currentState.getStatus().equals("Block"))
         {
-
-            this.statusList.add(new State(currentTime - this.prevTime));
+            this.statusList.add(new State((currentTime - this.prevTime),"Block"));
         }
         else
         {
-
-            this.statusList.add(new State(currentTime - this.prevTime));
+            this.statusList.add(new State((currentTime - this.prevTime),"Busy"));
         }
+
         this.prevTime = currentTime;
     }
 
@@ -79,7 +83,7 @@ public class Stage
     }
     public String getCurrentState()
     {
-        return currentStatus.getStatus();
+        return currentState.getStatus();
     }
     public double getTotalTime()
     {
@@ -137,7 +141,7 @@ public class Stage
         {
             if (sta.getStatus().equals("Starve"))
             {
-                starveDuration += Sta.getDuration();
+                starveDuration += sta.getDuration();
             }
         }
 

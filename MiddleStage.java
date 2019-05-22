@@ -5,7 +5,7 @@ public class MiddleStage extends Stage
 
     MiddleStage(String prodName, double mean, double range, Scheduler sch, InterStageStorage output, InterStageStorage input)
     {
-        super(prodName, mean, range, sch);
+        super(prodName, mean, range, schd);
         this.input = input;
         this.output = output;
     }

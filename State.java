@@ -10,56 +10,24 @@ Description:
 public class State
 {
     private double duration;
-    private String name;
     private String status;
 
     State()
     {
         this.duration = 0;
-        this.name = "";
         this.status = "Empty";
     }
 
-    State(String name)
-    {
-        this.duration = 0;
-        this.name = name;
-        this.status = "Empty";
-    }
-
-    State(String name, double time)
+    State(double time, String newStatus)
     {
         this.duration = time;
-        this.name = name;
-        this.status = "Empty";
-    }
-
-    State(String name, double time, String newStatus)
-    {
-        this.duration = time;
-        this.name = name;
         this.status = newStatus;
     }
 
     //also needs a method of saving the times it changes
-    public void setStatus(int num)
+    public void setStatus(String newStatus)
     {
-        if(num == 0)
-        {
-            this.status = "Busy";               //0 is busy
-        }
-        else if(num == 1)
-        {
-            this.status = "Block";              //1 is block
-        }
-        else if(num == 2)
-        {
-            this.status = "Starve";             //2 is starve
-        }
-        else
-        {
-            this.status = "Empty";
-        }
+        this.status = newStatus;
     }
 
     public String getStatus()
@@ -76,17 +44,4 @@ public class State
     {
         return this.duration;
     }
-
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    //what was the point of override again
-    @Override
-    public String toString()
-    {
-        return this.name;
-    }
-
 }
