@@ -22,8 +22,11 @@ public class PA3
             System.out.println("Not enough Parameters");
             return;
         }
-        
 
-        System.out.println("running: "+ "m " +m+"n "+n+"maxQ"+maxQ);
+        // initialize prodManager
+        this.prodManager = new ProductionLineManager(this.m, this.n, this.maxQ);
+        // run prodManager
+        this.prodManager.Begin();
+        
     }
 }

@@ -106,27 +106,37 @@ public class InterStageStorage
     }
 
     //calculates average time an item is within the queue
-    public double getIsqQueueTime()
+    //utilizes time stamps
+    public double getAvgQueueTime()
     {
-        double totalItems = this.qStamp.size();
+        double totalItems = this.timeQ.size();
         double totalDuration = 0;
-        for (TimeStamp t : this.qStamp)
+        double averageTime = 0;
+
+        //cool new method of enhanced looping through stuff
+        for (TimeStamp t : this.timeQ)
         {
             totalDuration += t.getDuration();
         }
-        return (totalItems==0)?0:totalDuration/totalItems;
+
+        averageTime = totalDuration/totalItems;
+
+        return averageTime;
     }
 
     //calculates average number of items in the queue at anytime
-    //utilizes time stamps
-    public double getIsqAvgItemCount()
+    public double getAvgItemCount()
     {
         double totalStamps = this.countStamp.size();
         double totalCount = 0;
+        double averageTime = 0;
+
         for (Integer i : this.countStamp)
         {
             totalCount += i;
         }
-        return (totalStamps==0)?0:(totalCount/totalStamps);
+        averageTime = totalCount/totalStamps;
+
+        return averageTime;
     }
 }
