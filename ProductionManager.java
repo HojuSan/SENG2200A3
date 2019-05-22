@@ -13,23 +13,30 @@ import java.lang.Thread;
 
 public class ProductionManager
 {
+    //production line settings
     private double m;
     private double n;
     private int maxQ;
 
+    //production line
+    private InterStageStorage q01, q02, q03, q04, q05;
+    private Stage s0, s1, s2a, s2b, s3, s4a, s4b, s5; 
+
+    //list of components of the production line
     private ArrayList<InterStageStorage> interStageList;
     private ArrayList<Stage> stageList;
 
+    //upper management
     private Inventory statistics;
     private Scheduler scheduler;
 
+    //constructor
     ProductionManager()
     {
         this.m = 0;
         this.n = 0;
         this.maxQ = 0;
     }
-    
     ProductionLineManager(double newM, double newN, int newMaxQ)
     {
         this.m = newM;
@@ -45,6 +52,7 @@ public class ProductionManager
         this.scheduler = new Scheduler(8);
     }
 
+    //function that does the heavy lifting and starts the produciton line
     public void begin()
     {
         this.createProductionLine();
@@ -54,7 +62,6 @@ public class ProductionManager
     public void createProductionLine()
     {
         //creation of interStageStorage
-        InterStageStorage q01, q02, q03, q04, q05;
         q01 = new InterStageStorage("Q01", this.maxQ);
         q02 = new InterStageStorage("Q12", this.maxQ);
         q03 = new InterStageStorage("Q23", this.maxQ);
@@ -67,5 +74,15 @@ public class ProductionManager
         this.interStageList.add(q03);
         this.interStageList.add(q04);
         this.interStageList.add(q05);
+
+        //creation of stages
+        s0 = new Stage("S0");
+        s1 = new Stage("S1");
+        s2a = new Stage("S2a");
+        s2b = new Stage("S2b");
+        s3 = new Stage("S3");
+        s4a = new Stage("S4a");
+        s4b = new Stage("S4b");
+        s5 = new Stage("S5");
     }
 }
