@@ -17,31 +17,47 @@ public class State
     {
         this.duration = 0;
         this.name = "";
+        this.status = "Empty";
     }
 
     State(String name)
     {
         this.duration = 0;
         this.name = name;
+        this.status = "Empty";
     }
 
     State(String name, double time)
     {
         this.duration = time;
         this.name = name;
+        this.status = "Empty";
     }
 
     //also needs a method of saving the times it changes
-    public void setStatus()
+    public void setStatus(int num)
     {
-        Block
-        Busy
-        Starve
+        if(num = 0)
+        {
+            this.status = "Busy";               //0 is busy
+        }
+        else if(num = 1)
+        {
+            this.status = "Block";              //1 is block
+        }
+        else if(num = 2)
+        {
+            this.status = "Starve";             //2 is starve
+        }
+        else
+        {
+            this.status = "Empty";
+        }
     }
 
-    public int getStatus()
+    public String getStatus()
     {
-
+        return status;
     }
 
     public void incrementDuration(double time)
