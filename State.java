@@ -34,6 +34,13 @@ public class State
         this.status = "Empty";
     }
 
+    State(String name, double time, String newStatus)
+    {
+        this.duration = time;
+        this.name = name;
+        this.status = newStatus;
+    }
+
     //also needs a method of saving the times it changes
     public void setStatus(int num)
     {

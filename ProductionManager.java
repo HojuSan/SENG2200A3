@@ -56,6 +56,8 @@ public class ProductionManager
     public void begin()
     {
         this.createProductionLine();
+
+        this.printResults();
     }
 
     //instantiates all the stages,states and interstagestorage
@@ -122,5 +124,21 @@ public class ProductionManager
         this.stageList.add(s4b);
         this.stageList.add(s5);
         System.out.println("Production line creation completed");
+    }
+
+    //instantiates all the stages,states and interstagestorage
+    public void printResults()
+    {
+        System.out.println("Printing results....");
+        System.out.println("Production Stations:");
+        System.out.println("--------------------------------------------");
+        System.out.println("Stage: Work[%] Starve[t] Block[t]");
+
+        System.out.println("Storage Queues:");
+        System.out.println("------------------------------");
+        System.out.println("Store AvgTime[t] AvgItems");
+
+        System.out.println("Production Paths:");
+        System.out.println("------------------------");
     }
 }

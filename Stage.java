@@ -17,8 +17,9 @@ public class Stage
     private double n;
     private Random r;
     private String name;
+    private double prevTime;
 
-    private List<State> status;
+    private List<State> statusList;
     private State currentStatus;
 
     private List<Stage> leftStage;
@@ -30,8 +31,13 @@ public class Stage
         this.name = newName;
         this.m = mean;
         this.n = range;
+        this.processItem = null;
+        this.r = new Random();
+        this.statusList = new LinkedList<State>();
+        this.currentState = new State();
         this.leftStage = new LinkedList<Stage>();
         this.rightStage = new LinkedList<Stage>();
+        this.prevTime = 0;
     }
 
     //randomized production time for items
@@ -44,6 +50,104 @@ public class Stage
         return m + (n * (r.nextDouble() - 0.5));
     }
 
+
+    //???????????????????????????????????????????????????????????????
+    // Increase current state's duration
+    public void updateTime(double currentTime)
+    {
+        if (this.currentState.getStatus().equals("Starve"))
+        {
+            this.statusList.add(new State(currentTime - this.prevTime));
+        }
+        else if (this.currentState.getStatus().equals("Block"))
+        {
+
+            this.statusList.add(new State(currentTime - this.prevTime));
+        }
+        else
+        {
+
+            this.statusList.add(new State(currentTime - this.prevTime));
+        }
+        this.prevTime = currentTime;
+    }
+
+    //getters
+    public String getName()
+    {
+        return name;
+    }
+    public String getCurrentState()
+    {
+        return currentStatus.getStatus();
+    }
+    public double getTotalTime()
+    {
+        double total = 0;
+
+        for (State sta : this.statusList)
+        {
+            total += sta.getDuration();
+        }
+        return total;
+    }
+    //returns a percentage
+    public double getStageAvgerageProduction()
+    {
+        double totalDuration = 0;
+        double busyDuration = 0;
+
+        for (State sta : this.statusList)
+        {
+            totalDuration += sta.getDuration();
+
+            if (sta.getStatus().equals("Busy"))
+            {
+                busyDuration += sta.getDuration();
+            }
+        }
+
+        return (busyDuration / totalDuration) * 100;
+        // return busyDuration;
+    }
+
+    //returns the total time
+    public double getStageTotalBlocked()
+    {
+        double blockedDuration = 0;
+
+        for (State sta : this.statusList)
+        {
+            if (sta.getStatus().equals("Block"))
+            {
+                blockedDuration += sta.getDuration();
+            }
+        }
+
+        return blockedDuration;
+    }
+
+
+    //returns the total time 
+    public double getStageTotalStarve()
+    {
+        double starveDuration = 0;
+
+        for (State sta : this.statusList)
+        {
+            if (sta.getStatus().equals("Starve"))
+            {
+                starveDuration += Sta.getDuration();
+            }
+        }
+
+        return starveDuration;
+    }
+
+    //notifying? checking? updating next stage?
+    //notifying? checking? updating next stage?    
+
+
     //setters
     public void setLeft(Stage left)
     {
@@ -52,11 +156,5 @@ public class Stage
     public void setRight(Stage right)
     {
         this.rightStage.add(right);
-    }
-
-    //getters
-    public String getName()
-    {
-        return name;
     }
 }
