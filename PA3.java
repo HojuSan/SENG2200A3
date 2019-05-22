@@ -11,9 +11,10 @@ public class PA3
     public static void main(String[] args) 
     {
         //no negative parameters, all ints
-        int m = Double.parseDouble(args[0]);
-        int n = Double.parseDouble(args[1]);
+        double m = Double.parseDouble(args[0]);
+        double n = Double.parseDouble(args[1]);
         int maxQ = Integer.parseInt(args[2]);
+        ProductionManager prodManager;
 
         //parameter checking
         if (args.length != 3)
@@ -24,9 +25,9 @@ public class PA3
         }
 
         // initialize prodManager
-        this.prodManager = new ProductionLineManager(this.m, this.n, this.maxQ);
+        prodManager = new ProductionManager(m, n, maxQ);
         // run prodManager
-        this.prodManager.Begin();
+        prodManager.begin();
         
     }
 }

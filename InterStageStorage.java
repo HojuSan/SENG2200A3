@@ -43,7 +43,7 @@ public class InterStageStorage
     //adds to the top of the queue
     public boolean enqueue(Item newItem, double currentTime)
     {
-        if(que.size())
+        if(que.size()<this.maxQ)
         {
             newItem.setEntryTime(currentTime);
             this.count += 1;
@@ -127,11 +127,11 @@ public class InterStageStorage
     //calculates average number of items in the queue at anytime
     public double getAvgItemCount()
     {
-        double totalStamps = this.countStamp.size();
+        double totalStamps = this.countQ.size();
         double totalCount = 0;
         double averageTime = 0;
 
-        for (Integer i : this.countStamp)
+        for (Integer i : this.countQ)
         {
             totalCount += i;
         }

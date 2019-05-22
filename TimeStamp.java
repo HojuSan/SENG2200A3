@@ -7,8 +7,8 @@ public class TimeStamp
     TimeStamp()
     {
         this.currentStage = "nothing";
-        this.entry = 0;
-        this.exit = 0;
+        this.entryTime = 0;
+        this.exitTime = 0;
     }
 
     TimeStamp(String stageName, double entTime, double exTime)
@@ -25,7 +25,7 @@ public class TimeStamp
 
     public String getStageName()
     {
-        return this.prodStageName;
+        return this.currentStage;
     }
 
     public void setEntryTime(double time)

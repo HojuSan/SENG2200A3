@@ -37,15 +37,15 @@ public class State
     //also needs a method of saving the times it changes
     public void setStatus(int num)
     {
-        if(num = 0)
+        if(num == 0)
         {
             this.status = "Busy";               //0 is busy
         }
-        else if(num = 1)
+        else if(num == 1)
         {
             this.status = "Block";              //1 is block
         }
-        else if(num = 2)
+        else if(num == 2)
         {
             this.status = "Starve";             //2 is starve
         }
