@@ -1,15 +1,20 @@
-//only needs to consider busy and block, since infinite amount of resources
+/*
+Title:              Assignment3
+Course:             SENG2200
+Author:             Juyong Kim
+Student No:         c3244203
+Date:               21/05/2019
+Description:        
+*/
 public class StartStage extends Stage
 {
     private InterStageStorage output;
-    private int itemCount;
 
-    StartStage(String prodName, double mean, double range, Scheduler schd, InterStageStorage output)
+    // Constructor
+    StartStage(String newName, InterStageStorage output, double mean, double range, Scheduler sched)
     {
-        super(prodName, mean, range, schd);
+        super(newName, mean, range, sched);
         this.output = output;
-
-        this. itemCount = 0;
     }
 
     // Pre-req: check if stage is currently busy processing an item
@@ -19,27 +24,24 @@ public class StartStage extends Stage
     {
         double duration = 0;
 
-        //Stage becomes busy
         if (this.currentState.getStatus().equals("Starve"))
         {
 
-            // transition to Busy
-            duration = this.generateProductionDuration();
+            // transition to BusyState
+            duration = this.calculateProdDuration();
 
             this.processItem = new Item();
             this.processItem.setEntryTime(currentTime);
 
             this.currentState.setStatus("Busy");
 
-            // directly call scheduler to add a new production 
-            this.sch.addNewProduction(duration, this);
+            // directly call scheduler to add a Production
+            this.scheduler.addNewProduction(duration, this);
 
             this.itemCount += 1;
         }
         else if (this.currentState.getStatus().equals("Block"))
         {
-
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             if (this.output.checkFull())
             {
                 // Continue BlockState
@@ -49,7 +51,7 @@ public class StartStage extends Stage
             {
                 // Transition to BusyState
                 this.processItem.setExitTime(currentTime);
-                this.processItem.stampTime(this.prodName);
+                this.processItem.stampTime(this.name);
 
                 this.output.enque(this.processItem, currentTime);
 
@@ -57,16 +59,16 @@ public class StartStage extends Stage
                 this.processItem.setEntryTime(currentTime);
 
                 duration = this.calculateProdDuration();
-                // directly call scheduler to add a job
-                this.jobSched.addNewJob(duration, this);
+                // directly call scheduler to add a Production
+                this.scheduler.addNewProduction(duration, this);
 
-                this.currentState = new BusyState();
+                this.currentState.setStatus("Busy");
                 this.itemCount += 1;
             }
         }
         else
         {
-            //Continue being busy
+            // Continue BusyState
             duration = -1;
         }
         return duration;
@@ -78,28 +80,24 @@ public class StartStage extends Stage
         // Increase currentState's duration
         this.incStateDur(currentTime);
 
-        if (this.output.isFull())
+        if (this.output.checkFull())
         {
             // transition to BlockState
-            this.currentState = new BlockState();
+            this.currentState.setStatus("Block");
         }
         else
         {
             // Finish item
             this.processItem.setExitTime(currentTime);
-            this.processItem.stampTime(this.prodName);
+            this.processItem.stampTime(this.name);
             this.output.enque(this.processItem, currentTime);
 
             this.processItem = null;
-            this.currentState = new StarveState();
+            this.currentState.setStatus("Starve");
 
             // Notify rightProd to Unstarve
             this.notifyRightProd(currentTime);
         }
     }
 
-    public int getTotalItemsCreated()
-    {
-        return this.itemCount;
-    }
 }

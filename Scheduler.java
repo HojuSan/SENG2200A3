@@ -1,16 +1,29 @@
+/*
+Title:              Assignment3
+Course:             SENG2200
+Author:             Juyong Kim
+Student No:         c3244203
+Date:               21/05/2019
+Description:        Core part of the code, it micro manages the production of items
+                    it communicates with the stages to check on states and storage to see
+                    if items should be processed, added or stored
+*/
+//libraries
 import java.util.PriorityQueue;
+import java.util.List;
 import java.util.Queue;
 
 public class Scheduler
 {
-    private double currentTime;
+    //variables
     private Queue<Production> productionQueue;
+    private double curTime;
 
-    Scheduler(int num)
+    // Constructor
+    Scheduler(int maxQ)
     {
-        System.out.println("Priority queue setup inside scheduler might be effed up");
-        this.productionQueue = new PriorityQueue<Production>(num);
-        this.currentTime = 0;
+        this.productionQueue = new PriorityQueue<Production>(maxQ, new ProductionComparator());
+        this.curTime = 0;
     }
 
     public void addNewProduction(double duration, Stage stage)
@@ -18,45 +31,51 @@ public class Scheduler
         productionQueue.add(new Production(duration, stage));
     }
 
-    public Stage processNextStage()
+    public Stage performNextProduction()
     {
-        Production topProduction = this.productionQueue.poll();
+        Production nextProduction = this.productionQueue.poll();
 
-        // Caution: Update time first, before finishing the job
-        // because finishJob relies on Scheduler's curTime!
-        this.currentTime += topProduction.getRemainingDuration();
+        this.curTime += nextProduction.getRemainingDuration();
 
-        // WARNING: Update the current jobs in Queue First
-        //          Before calling finishJob()
-        //          To avoid updating remaining duration of new jobs
-        //          Created by finishJob, when the prodStage performs
-        //          Its left and right unblock/unstarve notification
-        for (Production p : this.jobQueue)
+
+        for (Production p : this.productionQueue)
         {
-            // update the remainingDuration of the remainig
-            // jobs to push them up in the queue
-            p.updateRemainingDuration(topProduction.getRemainingDuration());
+            p.updateRemainingDuration(nextProduction.getRemainingDuration());
         }
 
-        // Finish the Job
-        // WARNING: Performs left and Right notification
-        //          Resulting in possibly new jobs added to queue
-        topProduction.finishProduction(this.currentTime);
+        nextProduction.finishProduction(this.curTime);
 
-        return topProduction.getStage();
+        return nextProduction.getStage();
     }
 
-    //getters
+    public double getCurrentTime()
+    {
+        return this.curTime;
+    }
+
+    public String getPrintFormat()
+    {
+        return "%-15s%-15s";
+    }
+
     public String getContents()
     {
-        return "Fix reading in Scheduler";
+        StringBuilder sb = new StringBuilder();
+        String name;
+        double dur;
+
+        for (Production j : this.productionQueue)
+        {
+            name = j.getStage().getName();
+            dur = j.getRemainingDuration();
+            sb.append(String.format(this.getPrintFormat(), name, dur));
+            sb.append("\n");
+        }
+        return sb.toString();
     }
+
     public int getProductionCount()
     {
         return this.productionQueue.size();
-    }
-    public double getCurrentTime()
-    {
-        return currentTime;
     }
 }

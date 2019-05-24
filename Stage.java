@@ -1,164 +1,196 @@
 /*
-Title:              Assignment3 PA3.java
+Title:              Assignment3
 Course:             SENG2200
 Author:             Juyong Kim
 Student No:         c3244203
 Date:               21/05/2019
 Description:        
 */
+//libraries
 import java.util.Random;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Queue;
 
-public class Stage
+public abstract class Stage
 {
-    private Item processItem;
-    private double m;
-    private double n;
-    private Random r;
-    private String name;
-    private double prevTime;
+    // Add flags for setting the state of the production stage
+    // implement prod stage as state machine pattern
 
-    private List<State> statusList;
-    private State currentState;
+    //private variables are 
+    protected Item processItem;
+    protected double mean;
+    protected double range;
+    protected Random r;
 
-    private List<Stage> leftStage;
-    private List<Stage> rightStage;
+    protected List<State> events;
+    protected State currentState;
+    protected double prevTime;
 
-    private Scheduler sch;
-    //key component of time management
-    //each class has its own override method
+    protected String name;
+
+    // For StartStage use only
+    protected int itemCount;
+
+    protected List<Stage> leftProd;
+    protected List<Stage> rightProd;
+
+    protected Scheduler scheduler;
+
     abstract public double processItem(double currentTime);
     abstract public void finishItem(double currentTime);
 
-
-    Stage(String newName, double mean, double range, Scheduler schd)
+    //constructor
+    Stage()
     {
-        this.name = newName;
-        this.m = mean;
-        this.n = range;
+        this.mean = 0;
+        this.range = 0;
         this.processItem = null;
         this.r = new Random();
-        this.sch = schd;
-        this.statusList = new LinkedList<State>();
+        this.events = new LinkedList<State>();
         this.currentState = new State();
-        this.leftStage = new LinkedList<Stage>();
-        this.rightStage = new LinkedList<Stage>();
         this.prevTime = 0;
+        this.name = "";
+        this.itemCount = 0;
+        this.scheduler = null;
+        this.leftProd = new LinkedList<Stage>();
+        this.rightProd = new LinkedList<Stage>();
+    }
+    Stage(String newName, double mean, double range, Scheduler sched)
+    {
+        this.mean = mean;
+        this.range = range;
+        this.processItem = null;
+        this.r = new Random();
+        this.events = new LinkedList<State>();
+        this.currentState = new State();
+        this.prevTime = 0;
+        this.name = newName;
+        this.itemCount = 0;
+        this.scheduler = sched;
+        this.leftProd = new LinkedList<Stage>();
+        this.rightProd = new LinkedList<Stage>();
     }
 
-    //randomized production time for items
-    private double generateProductionDuration()
+    protected double calculateProdDuration()
     {
         // P = M + (N * (d - 0.5))
-        // M - mean
-        // N - range
-        // d - random
-        return m + (n * (r.nextDouble() - 0.5));
+        return mean + (range * (r.nextDouble() - 0.5));
     }
 
-    // Increase current state's duration
-    public void updateTime(double currentTime)
+    public void incStateDur(double currentTime)
     {
-        if(this.currentState.getStatus().equals("Starve"))
+        if (this.currentState.getStatus().equals("Starve"))
         {
-            this.statusList.add(new State((currentTime - this.prevTime),"Starve"));
+            this.events.add(new State((currentTime - this.prevTime),"Starve"));
         }
-        else if(this.currentState.getStatus().equals("Block"))
+        else if (this.currentState.getStatus().equals("Block"))
         {
-            this.statusList.add(new State((currentTime - this.prevTime),"Block"));
+            this.events.add(new State((currentTime - this.prevTime),"Block"));
         }
         else
         {
-            this.statusList.add(new State((currentTime - this.prevTime),"Busy"));
+            this.events.add(new State((currentTime - this.prevTime),"Busy"));
         }
-
         this.prevTime = currentTime;
     }
 
+    public void setLeftProd(Stage left)
+    {
+        this.leftProd.add(left);
+    }
+
+    public void setRightProd(Stage right)
+    {
+        this.rightProd.add(right);
+    }
+
+    protected void notifyLeftProd(double currentTime)
+    {
+        for (Stage s : this.leftProd)
+        {
+            s.processItem(currentTime);
+        }
+    }
+
+    protected void notifyRightProd(double currentTime)
+    {
+        for (Stage s : this.rightProd)
+        {
+            s.processItem(currentTime);
+        }
+    }
+
     //getters
+    public int getTotalItemsCreated()
+    {
+        return this.itemCount;
+    }
     public String getName()
     {
-        return name;
+        return this.name;
     }
-    public String getCurrentState()
+    public String getState()
     {
-        return currentState.getStatus();
+        return this.currentState.getStatus();
     }
-    public double getTotalTime()
+    public double getTotalTimeOperation()
     {
         double total = 0;
-
-        for (State sta : this.statusList)
+        for (State s : this.events)
         {
-            total += sta.getDuration();
+            total += s.getDuration();
         }
         return total;
     }
-    //returns a percentage
-    public double getStageAvgerageProduction()
+    //uses forloops to add up the total time and returns it as a double
+    public double getStageTotalBlocked()
+    {
+        double totalDuration = 0;
+        double blockedDuration = 0;
+
+        for (State s : this.events)
+        {
+            totalDuration += s.getDuration();
+            if (s.getStatus().equals("Block"))
+            {
+                blockedDuration += s.getDuration();
+            }
+        }
+        return blockedDuration;
+    }
+    //uses forloops to add up the total time and returns it as a percentage
+    public double getStageAvgProduction()
     {
         double totalDuration = 0;
         double busyDuration = 0;
 
-        for (State sta : this.statusList)
+        for (State s : this.events)
         {
-            totalDuration += sta.getDuration();
-
-            if (sta.getStatus().equals("Busy"))
+            totalDuration += s.getDuration();
+            if (s.getStatus().equals("Busy"))
             {
-                busyDuration += sta.getDuration();
+                busyDuration += s.getDuration();
             }
         }
-
-        return (busyDuration / totalDuration) * 100;
+        return (totalDuration == 0)?0:(busyDuration / totalDuration) * 100;
         // return busyDuration;
     }
-
-    //returns the total time
-    public double getStageTotalBlocked()
-    {
-        double blockedDuration = 0;
-
-        for (State sta : this.statusList)
-        {
-            if (sta.getStatus().equals("Block"))
-            {
-                blockedDuration += sta.getDuration();
-            }
-        }
-
-        return blockedDuration;
-    }
-
-
-    //returns the total time 
+    //uses forloops to add up the total time and returns it as a double
     public double getStageTotalStarve()
     {
+        double totalDuration = 0;
         double starveDuration = 0;
 
-        for (State sta : this.statusList)
+        for (State s : this.events)
         {
-            if (sta.getStatus().equals("Starve"))
+            totalDuration += s.getDuration();
+            if (s.getStatus().equals("Starve"))
             {
-                starveDuration += sta.getDuration();
+                starveDuration += s.getDuration();
             }
         }
-
         return starveDuration;
-    }
-
-    //notifying? checking? updating next stage?
-    //notifying? checking? updating next stage?    
-
-
-    //setters
-    public void setLeft(Stage left)
-    {
-        this.leftStage.add(left);
-    }
-    public void setRight(Stage right)
-    {
-        this.rightStage.add(right);
     }
 }

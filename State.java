@@ -1,47 +1,46 @@
-
 /*
-Title:              Assignment3 PA3.java
+Title:              Assignment3
 Course:             SENG2200
 Author:             Juyong Kim
 Student No:         c3244203
 Date:               21/05/2019
-Description:        
+Description:        Uses strings to show the current status of Stages
 */
 public class State
 {
     private double duration;
     private String status;
 
+    //constructors
     State()
     {
         this.duration = 0;
-        this.status = "Empty";
+        this.status = "Starve";
     }
-
-    State(double time, String newStatus)
+    State(double d, String newStatus)
     {
-        this.duration = time;
+        this.duration = d;
         this.status = newStatus;
     }
 
-    //also needs a method of saving the times it changes
+    //setters
+    public void incrementDuration(double d)
+    {
+        this.duration += d;
+    }
     public void setStatus(String newStatus)
     {
         this.status = newStatus;
     }
 
+    //getters
+    public double getDuration()
+    {
+        return this.duration;
+    }
     public String getStatus()
     {
         return status;
     }
 
-    public void incrementDuration(double time)
-    {
-        this.duration += time;
-    }
-
-    public double getDuration()
-    {
-        return this.duration;
-    }
 }

@@ -1,98 +1,83 @@
 /*
-Title:              Assignment3 PA3.java
+Title:              Assignment3
 Course:             SENG2200
 Author:             Juyong Kim
 Student No:         c3244203
 Date:               21/05/2019
 Description:        
 */
-import java.util.Queue;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.LinkedList;
+import java.util.Queue;
 
-//fifo method is being used for this class
 public class InterStageStorage
 {
     private int maxQ;
-    private Queue<Item> que;
-    private int count;
-    private String name;
-    private List<TimeStamp> timeQ;                  //timestamp queue
-    private List<Integer> countQ;                   //count queue
+    private Queue<Item> itemList;
+    private int count;                      //counts the cmoun
+    private String name;                    
+    private List<TimeStamp> qStamp;
+    private List<Integer> countStamp;
 
+    //constructor
     InterStageStorage()
     {
-        this.maxQ = 10;                             //setting default to 10                      
-        this.que = new LinkedList<Item>();
+        this.maxQ = 10;                      
+        this.itemList = new LinkedList<Item>();
         this.count = 0;
         this.name = "";
-        this.timeQ = new LinkedList<TimeStamp>();
-        this.countQ = new LinkedList<Integer>();
+        this.qStamp = new LinkedList<TimeStamp>();
+        this.countStamp = new LinkedList<Integer>();
     }
-
-    InterStageStorage(String name, int num)
+    InterStageStorage(String name, int max)
     {
-        this.maxQ = num;                             //setting default to 10                      
-        this.que = new LinkedList<Item>();
+        this.maxQ = max;
+        this.itemList = new LinkedList<Item>();
         this.count = 0;
         this.name = name;
-        this.timeQ = new LinkedList<TimeStamp>();
-        this.countQ = new LinkedList<Integer>();
+        this.qStamp = new LinkedList<TimeStamp>();
+        this.countStamp = new LinkedList<Integer>();
     }
 
-    //adds to the top of the queue
-    public boolean enqueue(Item newItem, double currentTime)
+    //functions
+    public boolean enque(Item newItem, double currentTime)      //adds an element at the top
     {
-        if(que.size()<this.maxQ)
+        if (!this.checkFull())
         {
-            newItem.setEntryTime(currentTime);
+            // enque the item
+            newItem.setEntryTime(currentTime);                  //sets entry time using the global currenttime
             this.count += 1;
-            return que.add(newItem);
+            return itemList.add(newItem);
         }
         else
         {
             return false;
         }
     }
-    //
-    public Item deque(double currentTime)
+    public Item deque(double currentTime)                       //removes an element from the bottom
     {
-        Item deque = que.poll();                              //poll is queue function, removes the head of the list
-        deque.setExitTime(currentTime);                       //but returns the value  
-        //working on this, time stamps are important
-        this.timeQ.add(deque.queueStampTime(this.name));
+        Item deque = itemList.poll();
+        deque.setExitTime(currentTime);                         //sets exit time using the global currenttime
+        this.qStamp.add(deque.queueStampTime(this.name));       //add the time stamp to the list
         this.count -= 1;
         return deque;
     }
-    //keeps track of the amounts for average calculation
     public void stampCount()
     {
-        this.countQ.add(new Integer(this.count));
+        this.countStamp.add(new Integer(this.count));
     }
 
-    public boolean checkFull()
+    //checkers
+    public boolean checkFull()                                  //checks if storage full
     {
-        if(this.que.size()<this.maxQ)
-        {
+        if (this.itemList.size() < this.maxQ)
             return false;
-        }
         else
-        {
             return true;
-        }
     }
-
-    //not 100% if this will work, gotta do some testing first
-    public boolean checkEmpty()
+    public boolean checkEmpty()                                    //checks if storage is empty
     {
-        if(this.que.size()>0)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return this.itemList.checkEmpty();
     }
 
     //getters
@@ -100,43 +85,34 @@ public class InterStageStorage
     {
         return this.name;
     }
-    public int getCount()
+    public int getCurrentCount()
     {
         return this.count;
     }
-
-    //calculates average time an item is within the queue
-    //utilizes time stamps
-    public double getAvgQueueTime()
+    //both functions just loop to get all the values from the lists, then divide
+    //to get the average
+    public double getAverageQueueTime()                                         //returns average time an item is within the storage
     {
-        double totalItems = this.timeQ.size();
+        double totalItems = this.qStamp.size();
+        //System.out.println("total items is "+totalItems);                     //bug testing
         double totalDuration = 0;
-        double averageTime = 0;
-
-        //cool new method of enhanced looping through stuff
-        for (TimeStamp t : this.timeQ)
+        for (TimeStamp t : this.qStamp)
         {
+            //System.out.println("entry"+t.getEntryTime());
+            //System.out.println("exit"+t.getExitTime());
+            //System.out.println("duration"+t.getDuration());
             totalDuration += t.getDuration();
         }
-
-        averageTime = totalDuration/totalItems;
-
-        return averageTime;
+        return totalDuration/totalItems;
     }
-
-    //calculates average number of items in the queue at anytime
-    public double getAvgItemCount()
+    public double getAvgerageItemCount()                                        //returns average item counts for the storage
     {
-        double totalStamps = this.countQ.size();
+        double totalStamps = this.countStamp.size();
         double totalCount = 0;
-        double averageTime = 0;
-
-        for (Integer i : this.countQ)
+        for (Integer i : this.countStamp)
         {
             totalCount += i;
         }
-        averageTime = totalCount/totalStamps;
-
-        return averageTime;
+        return totalCount/totalStamps;
     }
 }

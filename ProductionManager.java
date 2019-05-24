@@ -1,149 +1,164 @@
 /*
-Title:              Assignment3 PA3.java
+Title:              Assignment3
 Course:             SENG2200
 Author:             Juyong Kim
 Student No:         c3244203
 Date:               21/05/2019
 Description:        
 */
+import java.util.List;
+import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.Queue;
 import java.util.Map;
 import java.util.Scanner;
 import java.lang.Thread;
 
 public class ProductionManager
 {
-    //production line settings
-    private double m;
-    private double n;
+    private double mean;
+    private double range;
     private int maxQ;
-    private int timeLimit = 10000000;
 
-    //production line
-    private InterStageStorage q01, q02, q03, q04, q05;
-    private Stage s0, s1, s2a, s2b, s3, s4a, s4b, s5; 
-
-    //list of components of the production line
-    private ArrayList<InterStageStorage> interStageList;
     private ArrayList<Stage> stageList;
+    private ArrayList<InterStageStorage> storageList;
 
-    //upper management
-    //private Inventory statistics;
     private Scheduler scheduler;
 
-    //constructor
+    private Inventory prodStat;
+
+    private final double MAX_TIME = 10000000;
+
+    private boolean IS_DEBUG = false;
+
+    private Scanner reader;
+
+    private InterStageStorage q01, q02, q03, q04, q05;
+    private Stage s0, s1, s2a, s2b, s3, s4a, s4b, s5;
+
+    // Constructor
     ProductionManager()
     {
-        this.m = 0;
-        this.n = 0;
+        this.mean = 0;
+        this.range = 0;
         this.maxQ = 0;
     }
-    ProductionManager(double newM, double newN, int newMaxQ)
+
+    ProductionManager(double mean, double range, int maxQLength)
     {
-        this.m = newM;
-        this.n = newN;
-        this.maxQ = newMaxQ;
-
+        this.mean = mean;
+        this.range = range;
+        this.maxQ = maxQLength;
         this.stageList = new ArrayList<Stage>();
-        this.interStageList = new ArrayList<InterStageStorage>();
+        this.storageList = new ArrayList<InterStageStorage>();
 
-        //this.statistics = new Inventory(this.stageList);
+        this.prodStat = new Inventory(this.stageList);
 
+        // Production priority queue should only have length
         // same as the number of Production stages
+        // TODO: Hard coded Production queue length!
         this.scheduler = new Scheduler(8);
+
     }
 
-    //function that does the heavy lifting and starts the produciton line
     public void begin()
     {
-        //used as a check
-        Stage completed;
 
-        this.createProductionLine();
+        Stage stageFinished;
+        // create the structure of the production line
+        this.generateProductionInfastructure();
 
-        while(scheduler.getCurrentTime()<timeLimit)
+        // Main simulation loop
+        while (this.scheduler.getCurrentTime() < this.MAX_TIME)
         {
-            //process, unblock, block, starve stages
-            this.processCycle();
+            // Process Phase/Unblock Phase/Starve Phase
+            this.processPhase();
 
-            //finish the cycle
-            completed = this.scheduler.processNextStage();
+            // Finish Phase
+            stageFinished = this.scheduler.performNextProduction();
 
-            //update new stage state durations
+            // Update stage state durations
             for (Stage p : this.stageList)
             {
-                if (p != completed)
-                    p.updateTime(this.scheduler.getCurrentTime());
+                if (p != stageFinished)
+                    p.incStateDur(this.scheduler.getCurrentTime());
             }
-            
+
+            this.stampAvgItems();
+
         }
 
-        this.printResults();
+        this.printStatus();
+
+        if (reader != null)
+            reader.close();
     }
 
-    private void processCycle()
+    private void processPhase()
     {
-        for (Stage sta : this.stageList)
+
+        for (Stage s : this.stageList)
         {
-            sta.processItem(this.scheduler.getCurrentTime());
+            s.processItem(this.scheduler.getCurrentTime());
         }
     }
 
-    //instantiates all the stages,states and interstagestorage
-    public void createProductionLine()
+    private void generateProductionInfastructure()
     {
-        //creation of interStageStorage
-        q01 = new InterStageStorage("Q01", this.maxQ);
-        q02 = new InterStageStorage("Q12", this.maxQ);
-        q03 = new InterStageStorage("Q23", this.maxQ);
-        q04 = new InterStageStorage("Q34", this.maxQ);
-        q05 = new InterStageStorage("Q45", this.maxQ);
+        // Stes up all production stages and connections
 
-        //add them to the list of storages
-        this.interStageList.add(q01);
-        this.interStageList.add(q02);
-        this.interStageList.add(q03);
-        this.interStageList.add(q04);
-        this.interStageList.add(q05);
+        // ISQ's
+        q01 = new InterStageStorage("Q1", this.maxQ);
+        q02 = new InterStageStorage("Q2", this.maxQ);
+        q03 = new InterStageStorage("Q3", this.maxQ);
+        q04 = new InterStageStorage("Q4", this.maxQ);
+        q05 = new InterStageStorage("Q5", this.maxQ);
 
-        //creation of stages
-        s0 = new StartStage("S0", m, n, scheduler, q01);
-        s1 = new MiddleStage("S1", m, n, scheduler, q01, q02);
-        s2a = new MiddleStage("S2a", m, n, scheduler, q02, q03);
-        s2b = new MiddleStage("S2b", m, n, scheduler, q02, q03);
-        s3 = new MiddleStage("S3", m, n, scheduler, q03, q04);
-        s4a = new MiddleStage("S4a", m, n, scheduler, q04, q05);
-        s4b = new MiddleStage("S4b", m, n, scheduler, q04, q05);
-        s5 = new EndStage("S5", m, n, scheduler, q05);
+        this.storageList.add(q01);
+        this.storageList.add(q02);
+        this.storageList.add(q03);
+        this.storageList.add(q04);
+        this.storageList.add(q05);
 
-        //Connecting the stages
-        s0.setRight(s1);
+        // For now, create the structure statically
+        s0 = new StartStage("S0", q01, this.mean, this.range, this.scheduler);
+        s1 = new MiddleStage("S1", q01, q02, this.mean, this.range, this.scheduler);
+        s2a = new MiddleStage("S2a", q02, q03, this.mean * 2, this.range * 2, this.scheduler);
+        s2b = new MiddleStage("S2b", q02, q03, this.mean , this.range * 0.5, this.scheduler);
+        s3 = new MiddleStage("S3", q03, q04, this.mean, this.range, this.scheduler);
+        s4a = new MiddleStage("S4a", q04, q05, this.mean, this.range * 0.5, this.scheduler);
+        s4b = new MiddleStage("S4b", q04, q05, this.mean * 2, this.range * 2, this.scheduler);
+        s5 = new FinishStage("S5", q05, this.mean, this.range, this.prodStat, this.scheduler);
 
-        s1.setLeft(s0);
-        s1.setRight(s2a);
-        s1.setRight(s2b);
+        // Set the MiddleStages' left and right Prod for unblocking/unstarving
+        s0.setRightProd(s1);
 
-        s2a.setLeft(s1);
-        s2a.setRight(s3);
+        s1.setLeftProd(s0);
+        s1.setRightProd(s2a);
+        s1.setRightProd(s2b);
 
-        s2b.setLeft(s1);
-        s2b.setRight(s3);
+        s2a.setLeftProd(s1);
+        s2a.setRightProd(s3);
 
-        s3.setLeft(s2a);
-        s3.setLeft(s2b);
-        s3.setRight(s4a);
-        s3.setRight(s4b);
+        s2b.setLeftProd(s1);
+        s2b.setRightProd(s3);
 
-        s4a.setLeft(s3);
-        s4a.setRight(s5);
+        s3.setLeftProd(s2a);
+        s3.setLeftProd(s2b);
 
-        s4b.setLeft(s3);
-        s4b.setRight(s5);
+        s3.setRightProd(s4a);
+        s3.setRightProd(s4b);
 
-        s5.setLeft(s4a);
-        s5.setLeft(s4b);
+        s4a.setLeftProd(s3);
+        s4a.setRightProd(s5);
 
-        //add them to the list of stages
+        s4b.setLeftProd(s3);
+        s4b.setRightProd(s5);
+
+        s5.setLeftProd(s4a);
+        s5.setLeftProd(s4b);
+
+        // Add the ProdStages to the list
         this.stageList.add(s0);
         this.stageList.add(s1);
         this.stageList.add(s2a);
@@ -152,22 +167,90 @@ public class ProductionManager
         this.stageList.add(s4a);
         this.stageList.add(s4b);
         this.stageList.add(s5);
-        System.out.println("Production line creation completed");
+
     }
 
-    //instantiates all the stages,states and interstagestorage
-    public void printResults()
+    private void printStats()
     {
-        System.out.println("Printing results....");
-        System.out.println("Production Stations:");
-        System.out.println("--------------------------------------------");
-        System.out.println("Stage: Work[%] Starve[t] Block[t]");
+        StringBuilder sb1 = new StringBuilder();
+
+        System.out.println("\n\nProduction Stations:");
+        System.out.println("----------------------------------------------------------");
+        String mainFormat1 = "%-15s%-15s%-15s%-15s";
+        String prod, starve, block;
+
+        System.out.println(String.format(mainFormat1,"Stage:","Work[%]:","Starve[t]:","Block[t]:"));
+
+        for (Stage s : this.stageList)
+        {
+            prod = String.format("%.2f",s.getStageAvgProduction()) + "%";
+            starve = String.format("%.2f", s.getStageTotalStarve());
+            block = String.format("%.2f", s.getStageTotalBlocked());
+
+            sb1.append(String.format(mainFormat1,s.getName(),prod,starve,block,String.format("%.2f",s.getTotalTimeOperation())));
+            sb1.append("\n");
+        }
+        System.out.println(sb1.toString());
+
+    }
+
+    private void printIsqTime()
+    {
+        StringBuilder sb2 = new StringBuilder();
 
         System.out.println("Storage Queues:");
-        System.out.println("------------------------------");
-        System.out.println("Store AvgTime[t] AvgItems");
+        System.out.println("---------------------------------------");
+        String mainFormat2 = "%-15s%-15s%-15s";
+        String itemFormat2 = "%6.3f";
 
-        System.out.println("Production Paths:");
-        System.out.println("------------------------");
+        String name, aveTime, aveItems;
+        String count;
+
+        System.out.println(String.format(mainFormat2, "Store", "AvgTime[t]:", "AvgItems:"));
+
+        for (InterStageStorage q : this.storageList)
+        {
+            name = q.getName();
+            aveTime = String.format(itemFormat2, q.getAverageQueueTime());
+            aveItems = String.format(itemFormat2, q.getAvgerageItemCount());
+            sb2.append(String.format(mainFormat2, name, aveTime, aveItems));
+            sb2.append("\n");
+        }
+        System.out.println(sb2.toString());
     }
+
+    private void stampAvgItems()
+    {
+        for (InterStageStorage q : this.storageList)
+        {
+            q.stampCount();
+        }
+    }
+
+    private void printPathsCount()
+    {
+        StringBuilder sb3 = new StringBuilder();
+        System.out.println("Production Paths:");
+        System.out.println("-----------------------------------");
+        String mainFormat3 = "%-30s%-30s";
+
+        System.out.println(String.format(mainFormat3, "Path:", "Items Produced:"));
+
+        Map<String, Double> paths = this.prodStat.getPathsCount();
+        for (Map.Entry<String, Double> entry : paths.entrySet())
+        {
+           sb3.append(String.format(mainFormat3, entry.getKey(), entry.getValue().intValue()));
+           sb3.append("\n");
+        }
+        System.out.println(sb3.toString());
+
+    }
+
+    private void printStatus()
+    {
+        this.printStats();
+        this.printIsqTime();
+        this.printPathsCount();
+    }
+
 }
